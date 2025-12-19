@@ -23,6 +23,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform footPos; // 발바닥 위치 (빈 오브젝트)
     [SerializeField] private Vector2 groundCheckSize = new Vector2(0.5f, 0.2f); // 접지 판정 박스 크기
 
+    [Header("Combat")]
+    [SerializeField] private GameObject attackVFX; // 자식 오브젝트를 연결할 변수
+    [SerializeField] private float attackDuration = 0.2f; // 공격 이펙트가 보여질 시간 (애니메이션 길이와 맞춰주세요)
+    [SerializeField] private Transform attackPoint; // 공격 중심점
+    [SerializeField] private float attackRange = 0.5f; // 공격 반경
+    [SerializeField] private LayerMask enemyLayer; // 적 레이어 (선택 사항, 없으면 다 때림)
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip attackSound; // 공격 소리 파일
+    [SerializeField] private AudioClip jumpSound;   // 점프 소리 파일
+    [SerializeField] private AudioClip dashSound;   // 대쉬 소리 파일
+
     // 내부 변수
     private Rigidbody2D rb;
     private Vector2 moveInput;
@@ -31,6 +43,10 @@ public class PlayerController : MonoBehaviour
     private bool isDashing;
     private bool canDash = true;
     private bool isJumping;
+    private bool isGrounded;
+    private bool isAttacking;
+    // 애니메이터 변수
+    private Animator anim;
 
     // 고급 점프용 타이머
     private float lastGroundedTime;
@@ -41,6 +57,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         // 중력 스케일 초기 설정
         rb.gravityScale = gravityScale;
+        anim = GetComponent<Animator>();
     }
 
     private void Update()
@@ -53,7 +70,7 @@ public class PlayerController : MonoBehaviour
 
         // 1. 접지 판정 (BoxCast 이용 - Raycast보다 안정적)
         // 발바닥 위치에서 아래로 쏘는 사각형 레이캐스트
-        bool isGrounded = Physics2D.OverlapBox(footPos.position, groundCheckSize, 0f, groundLayer);
+        isGrounded = Physics2D.OverlapBox(footPos.position, groundCheckSize, 0f, groundLayer);
         
         // 땅에 닿아있으면 코요테 타임 갱신 (항상 점프 가능 상태로 유지)
         if (isGrounded && rb.linearVelocity.y <= 0) // 올라가는 중이 아닐 때만
@@ -83,6 +100,9 @@ public class PlayerController : MonoBehaviour
         {
             rb.gravityScale = gravityScale;
         }
+
+        // 에니메이션 업데이트
+        UpdateAnimationState();
     }
 
     private void FixedUpdate()
@@ -91,6 +111,24 @@ public class PlayerController : MonoBehaviour
 
         // 이동 적용
         rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+    }
+
+    //애니메이션 상태 관리 함수
+    private void UpdateAnimationState()
+    {
+        if (anim == null) return;
+
+        // 1. 달리기 상태 (입력값이 0이 아니면 달리는 중)
+        bool running = Mathf.Abs(moveInput.x) > 0;
+        anim.SetBool("isRunning", running);
+
+        // 2. 바닥 상태
+        // isGrounded 변수는 Update에서 이미 계산되고 있다고 가정
+        anim.SetBool("isGrounded", isGrounded); // 혹은 lastGroundedTime > 0
+
+        // 3. 수직 속도 (점프 vs 낙하 구분용)
+        anim.SetFloat("yVelocity", rb.linearVelocity.y);
+        
     }
 
     private void PerformJump()
@@ -116,6 +154,11 @@ public class PlayerController : MonoBehaviour
         if (value.isPressed)
         {
             lastJumpPressedTime = jumpBufferTime;
+            // 점프 소리 재생
+            if (isGrounded)
+            {
+                SoundManager.Instance.PlaySFX(jumpSound);
+            }
         }
         // 키를 뗐을 때 (가변 점프): 점프 중이라면 속도를 깎아서 낮게 점프
         else if (rb.linearVelocity.y > 0 && isJumping)
@@ -134,17 +177,71 @@ public class PlayerController : MonoBehaviour
 
     public void OnAttack(InputValue value)
     {
-        if (value.isPressed)
+        // 키를 눌렀고, 공격 중이 아니고, 대쉬 중이 아닐 때 실행
+        if (value.isPressed && !isAttacking && !isDashing)
         {
-            Debug.Log("공격! (애니메이션 연결 필요)");
-            // 여기에 공격 로직 추가
+            StartCoroutine(AttackRoutine());
         }
     }
 
     // --- Coroutines ---
+    private IEnumerator AttackRoutine()
+    {
+        isAttacking = true;
+
+        // 1. 플레이어 몸체 애니메이션 실행 (만약 있다면)
+        if (anim != null) anim.SetTrigger("Attack");
+
+        // 공격 소리 재생
+        SoundManager.Instance.PlaySFX(attackSound);
+
+        // 2. 이펙트 오브젝트 켜기! (이때 이펙트 애니메이션이 자동 재생됨)
+        if (attackVFX != null)
+        {
+            attackVFX.SetActive(true);
+        }
+
+        // 공격 판정
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange);
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            // 'Enemy' 태그가 붙은 놈만 때림
+            if (enemy.CompareTag("Enemy"))
+            {
+                // 상대방의 Enemy 스크립트를 가져와서 데미지 함수 실행
+                Enemy enemyScript = enemy.GetComponent<Enemy>();
+                if (enemyScript != null)
+                {
+                    enemyScript.TakeDamage(1);
+                }
+            }
+        }
+
+        // 3. 공격 애니메이션 시간만큼 대기
+        yield return new WaitForSeconds(attackDuration);
+
+        // 4. 이펙트 끄기
+        if (attackVFX != null)
+        {
+            attackVFX.SetActive(false);
+        }
+
+        isAttacking = false;
+        
+        
+    }
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null) return;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    }
     private IEnumerator DashRoutine()
     {
         isDashing = true;
+        anim.SetBool("isDashing", isDashing);
+        SoundManager.Instance.PlaySFX(dashSound);
         canDash = false;
         float originalGravity = rb.gravityScale;
         rb.gravityScale = 0f;
@@ -155,6 +252,7 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = originalGravity;
         rb.linearVelocity = Vector2.zero;
         isDashing = false;
+        anim.SetBool("isDashing", isDashing);
 
         yield return new WaitForSeconds(dashCooldown);
         canDash = true;
