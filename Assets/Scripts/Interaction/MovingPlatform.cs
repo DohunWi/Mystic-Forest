@@ -1,65 +1,3 @@
-// using UnityEngine;
-
-// public class MovingPlatform : MonoBehaviour
-// {
-//     public Transform posA, posB; // 이동할 두 지점 (빈 오브젝트로 위치 지정)
-//     public float speed = 2f;
-    
-//     private Vector3 targetPos;
-
-//     void Start()
-//     {
-//         targetPos = posB.position;
-//     }
-
-//     void Update()
-//     {
-//         // 목표 지점으로 이동
-//         transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
-
-//         // 도착하면 목표 변경
-//         if (Vector2.Distance(transform.position, targetPos) < 0.1f)
-//         {
-//             if (targetPos == posB.position) targetPos = posA.position;
-//             else targetPos = posB.position;
-//         }
-//     }
-
-//     // ★ 핵심: 플레이어가 위에 탔을 때 발판을 부모로 설정 (같이 움직임)
-//     private void OnCollisionEnter2D(Collision2D collision)
-//     {
-//         if (collision.gameObject.CompareTag("Player"))
-//         {
-//             // [수정] 단순 높이 비교 대신, '충돌 지점의 방향'을 확인합니다.
-//             // 접촉면(Contact Point)의 법선 벡터(Normal)가 아래쪽(-Y)을 향하면 
-//             // 플레이어가 위에서 밟았다는 뜻입니다.
-//             foreach (ContactPoint2D contact in collision.contacts)
-//             {
-//                 if (contact.normal.y < -0.5f) // 확실하게 위에서 밟았을 때만
-//                 {
-//                     collision.transform.SetParent(transform);
-//                     break; // 하나만 확인하면 됨
-//                 }
-//             }
-//         }
-//     }
-
-//     // 내리면 부모 해제
-//     private void OnCollisionExit2D(Collision2D collision)
-//     {
-//         // ★ 추가된 부분: 발판이 비활성화되는 중이라면 아무것도 하지 마라
-//         if (!gameObject.activeInHierarchy) return;
-
-//         if (collision.gameObject.CompareTag("Player"))
-//         {
-//             collision.transform.SetParent(null);
-            
-//             // 만약 DontDestroyOnLoad를 쓰는 구조라면 SceneManager.MoveGameObjectToScene 등을 써야 할 수도 있음
-//             // (일반적인 경우에는 null로 충분)
-//         }
-//     }
-// }
-
 using UnityEngine;
 
 public class MovingPlatform : MonoBehaviour
@@ -101,7 +39,7 @@ public class MovingPlatform : MonoBehaviour
         }
     }
 
-    // 플레이어가 탔다! (기억하기)
+    // 플레이어가 탔다 (기억하기)
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))

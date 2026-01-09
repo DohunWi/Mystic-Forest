@@ -20,7 +20,7 @@ public class EnemyAI : MonoBehaviour
     public float moveSpeed = 3f;
     public float detectRange = 5f;
     
-    [Header("Health Settings")] // [추가] 체력 설정
+    [Header("Health Settings")] // 체력 설정
     public float maxHealth = 3f;
     private float currentHealth;
 
@@ -34,17 +34,17 @@ public class EnemyAI : MonoBehaviour
     public float knockbackDuration = 0.2f; 
     public Vector2 knockbackSpeed = new Vector2(5, 3); // x, y 힘
 
-    [Header("Audio Clips")] // [추가] 소리 파일 넣을 곳
+    [Header("Audio Clips")] // 소리 파일 넣을 곳
     [SerializeField] private AudioClip attackSound; // 공격 기합/휘두르기
     [SerializeField] private AudioClip hitSound;    // 맞았을 때 비명
     [SerializeField] private AudioClip dieSound;    // 사망 소리
-    [SerializeField] private AudioClip idleSound; // [추가] 평소 울음소리
+    [SerializeField] private AudioClip idleSound; // 평소 울음소리
 
     [Header("References")]
     public Transform playerCheck;  
     public LayerMask playerLayer;  
     
-    // [추가] 이펙트 프리팹을 넣을 변수
+    // 이펙트 프리팹을 넣을 변수
     [SerializeField] private GameObject hitVFXPrefab;
     [SerializeField] private GameObject hitPos; 
     public Transform Target { get; private set; } 
@@ -69,7 +69,7 @@ public class EnemyAI : MonoBehaviour
 
     private void Start()
     {
-        currentHealth = maxHealth; // [추가] 체력 초기화
+        currentHealth = maxHealth; // 체력 초기화
 
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
@@ -127,7 +127,7 @@ public class EnemyAI : MonoBehaviour
         StateMachine.ChangeState(HitState);
     }
 
-    // [추가] 사망 처리 함수
+    // 사망 처리 함수
     private void Die()
     {
         Debug.Log("몬스터 사망!");
@@ -135,7 +135,7 @@ public class EnemyAI : MonoBehaviour
         // 1. 더 이상 움직이지 못하게 고정
         SetVelocity(0);
         Rb.linearVelocity = Vector2.zero;
-        Rb.bodyType = RigidbodyType2D.Kinematic; // 중력 영향 끄기 (선택사항)
+        Rb.bodyType = RigidbodyType2D.Kinematic; // 중력 영향 끄기
 
         if (SoundManager.Instance != null) SoundManager.Instance.PlaySFX(dieSound);
 
@@ -149,11 +149,11 @@ public class EnemyAI : MonoBehaviour
         Anim.Play("Die");
 
         // 5. 오브젝트 삭제 (애니메이션이 끝날 때쯤 삭제)
-        // 팁: Death 애니메이션 길이를 확인하고 그 시간만큼 적어주세요 (예: 1초)
+        // Death 애니메이션 길이를 확인하고 그 시간만큼 
         Destroy(gameObject, 1.2f);
     }
 
-    // [추가] 피격 시 하얗게 깜빡이는 연출
+    // 피격 시 하얗게 깜빡이는 연출
     private IEnumerator FlashRoutine()
     {
         if (sr != null)
@@ -178,8 +178,7 @@ public class EnemyAI : MonoBehaviour
             float waitTime = Random.Range(3f, 7f);
             yield return new WaitForSeconds(waitTime);
 
-            // 소리 파일이 있고, 너무 멀리 있지 않을 때만 재생 (선택사항)
-            // (화면 밖 몬스터 소리가 들리면 시끄러우니까요)
+            // 소리 파일이 있고, 너무 멀리 있지 않을 때만 재생 
             if (idleSound != null && SoundManager.Instance != null)
             {
                 SoundManager.Instance.PlaySFX(idleSound);
@@ -231,10 +230,10 @@ public class EnemyAI : MonoBehaviour
         // 현재 재생 중인 애니메이션의 상태 정보를 가져옴
         AnimatorStateInfo stateInfo = Anim.GetCurrentAnimatorStateInfo(0);
 
-        // 만약 요청한 애니메이션이 이미 재생 중이라면? -> 아무것도 안 하고 리턴!
+        // 만약 요청한 애니메이션이 이미 재생 중이라면? -> 아무것도 안 하고 리턴
         if (stateInfo.IsName(stateName)) return;
 
-        // 아니라면 -> 재생!
+        // 아니라면 -> 재생
         Anim.Play(stateName);
     }
     public void AnimationAttackTrigger()

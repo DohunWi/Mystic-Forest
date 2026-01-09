@@ -3,7 +3,7 @@ using UnityEngine;
 public class JumpPad : MonoBehaviour
 {
     [Header("설정")]
-    public float bounceForce = 15f; // 튀어 오르는 힘 (15~20 추천)
+    public float bounceForce = 15f; // 튀어 오르는 힘 
 
     private Animator anim;
 
@@ -34,7 +34,7 @@ public class JumpPad : MonoBehaviour
         Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            // ★ 핵심: 기존 낙하 속도를 0으로 만들어야 점프 높이가 일정함
+            // 기존 낙하 속도를 0으로 만들어야 점프 높이가 일정함
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
 
             // 위로 힘을 가함 (Impulse는 순간적인 힘)

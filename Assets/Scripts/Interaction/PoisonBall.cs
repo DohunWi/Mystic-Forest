@@ -23,8 +23,8 @@ public class PoisonBall : MonoBehaviour
         // 플레이어 맞춤
         if (collision.CompareTag("Player"))
         {
-            // 플레이어 스크립트에서 TakeDamage 함수 호출 (이전 함정 코드 참고)
-            var player = collision.GetComponent<PlayerHealth>(); // 본인 스크립트 이름으로 변경!
+            // 플레이어 스크립트에서 TakeDamage 함수 호출
+            var player = collision.GetComponent<PlayerHealth>(); 
             if (player != null) player.TakeDamage(damage, transform);
             
             Destroy(gameObject); // 총알 삭제

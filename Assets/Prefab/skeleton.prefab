@@ -555,10 +555,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI
   moveSpeed: 3
   detectRange: 10
-  maxHealth: 3
+  maxHealth: 15
   attackRange: 1.5
   attackCooldown: 2
-  damage: 1
+  damage: 10
   lastAttackTime: 0
   knockbackDuration: 0.4
   knockbackSpeed: {x: 20, y: 5}

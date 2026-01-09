@@ -30,9 +30,8 @@ public class EnemyChaseState : MonsterState
                 // 쿨타임 중 -> 멈춰서 노려보기
                 enemy.SetVelocity(0f);
                 
-                // [수정] 제자리걸음 방지! 
-                // "Chase 상태지만 멈춰있으니 Idle 애니메이션을 보여줘"
-                // (주의: 애니메이터에 있는 이름과 똑같아야 함. 예: "Enemy_Idle")
+                // 제자리걸음 방지
+                // Chase 상태지만 멈춰있으니 Idle 애니메이션을 재생
                 enemy.PlayAnim("Idle"); 
             }
             return;
@@ -52,8 +51,7 @@ public class EnemyChaseState : MonsterState
             enemy.SetVelocity(enemy.moveSpeed * direction);
             enemy.Flip(direction);
             
-            // [수정] 다시 움직이니까 Run 애니메이션 재생
-            // (주의: 애니메이터 이름과 똑같아야 함. 예: "Enemy_Run")
+            // 다시 움직이니까 Run 애니메이션 재생
             enemy.PlayAnim("Chase");
         }
     }
