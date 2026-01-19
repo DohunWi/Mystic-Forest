@@ -12,6 +12,7 @@
 ## 🎮 Play the Game
 별도의 설치 없이 웹 브라우저에서 바로 플레이할 수 있습니다.
 > **👉 [Play on itch.io](https://dony-wi.itch.io/game)**
+
 > **📹 [Game Play Video](https://www.youtube.com/watch?v=t2p8x0J4XqU)**
 
 <br>
@@ -23,7 +24,7 @@
 ### 🎥 Gameplay Preview
 | Combat & Parry | Boss Phase & Pattern | Victory Sequence |
 | :---: | :---: | :---: |
-| ![Combo Action](README_Assets/Combat.gif) | ![Boss Pattern](README_Assets/Combat.gif) | ![Ending](README_Assets/Ending.gif) |
+| ![Combo Action](README_Assets/Combat.gif) | ![Boss Pattern](README_Assets/Boss.gif) | ![Ending](README_Assets/Ending.gif) |
 | *3단 콤보 및 패링 시스템* | *부유형 보스 패턴 및 광폭화* | *엔딩 및 슬로우 모션 연출* |
 
 <br>
@@ -94,7 +95,7 @@ void MoveToTarget()
    ```bash
    git clone [https://github.com/DohunWi/Mystic-Forest.git](https://github.com/DohunWi/Mystic-Forest.git)
 2. Open in Unity Hub(Add project from disk).
-3. Open **Scenes/TitleScene** to start.
+3. Open `Scenes/TitleScene` to start.
 
 <br>
 
