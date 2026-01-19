@@ -12,6 +12,7 @@
 ## 🎮 Play the Game
 별도의 설치 없이 웹 브라우저에서 바로 플레이할 수 있습니다.
 > **👉 [Play on itch.io](https://dony-wi.itch.io/game)**
+> **📹 [Game Play Video](https://www.youtube.com/watch?v=t2p8x0J4XqU)**
 
 <br>
 
