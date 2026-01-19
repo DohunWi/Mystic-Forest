@@ -19,7 +19,7 @@
 
 ## 📝 Project Overview
 **Mystic Forest**는 숲을 오염시키는 거대 몬스터를 처치하는 2D 횡스크롤 액션 게임입니다.  
-단순한 조작으로 화려한 액션을 즐길 수 있도록 **타격감(Juice)** 구현에 집중했으며, 상태 머신(FSM)을 활용한 보스 AI와 최적화된 WebGL 빌드를 목표로 개발했습니다.
+단순한 조작으로 화려한 액션을 즐길 수 있도록 **타격감(Juice)** 구현에 집중했으며, 상태 머신(FSM)을 활용한 Enemy AI와 역동적인 보스전, 최적화된 WebGL 빌드를 목표로 개발했습니다.
 
 ### 🎥 Gameplay Preview
 | Combat & Parry | Boss Phase & Pattern | Victory Sequence |
@@ -35,10 +35,10 @@
 - **3-Hit Combo:** 공격 버튼 연타 시 1타/2타/3타 애니메이션과 판정이 변화하며, 마지막 타격에 강력한 임팩트 부여.
 - **Parry System:** 적의 공격 타이밍에 맞춰 방어 시 `Time.timeScale`을 조절하여 슬로우 모션 효과와 반격 기회 제공.
 
-### 2. Intelligent Boss AI (FSM)
+### 2. Intelligent Boss AI
 - **Deadzone Movement Logic:** 부유형 보스의 무게감을 위해, 플레이어와의 고도 차이가 임계값(Threshold)을 넘을 때만 Y축 이동을 수행하는 데드존 로직 적용.
-- **3-Phase Patterns:** 체력에 따라 [Smash(지면 강타)] → [Magic(유도탄)] → [Thunder(광역기)]로 변화하는 패턴 구현.
-- **Enrage Mode:** 체력 50% 이하 시 붉은 오라(Particle)와 함께 공격 속도가 빨라지는 광폭화 시스템.
+- **3-Attack Patterns:**  [Smash(지면 강타)]  [Magic(유도탄)]  [Thunder(광역기)] 특정 확률에 따른 3가지 위협적인 공격 패턴 구현.
+- **Enrage Mode:** 체력 50% 이하 시 붉은 오라(Particle)와 함께 공격 속도가 빨라지고 공격 패턴이 강화되는 광폭화 시스템.
 
 ### 3. Visual & Audio Polish (Game Juice)
 - **Hit Stop:** 타격 성공 시 0.15초간 프레임을 정지시켜 물리적 저항감 표현.
@@ -58,7 +58,7 @@
 - **IDE:** Visual Studio Code
 
 ### Core Technologies
-- **Finite State Machine (FSM):** 보스의 상태(Idle, Chase, Attack, Dead)를 클래스로 관리하여 확장성 확보.
+- **Finite State Machine (FSM):** 일반 몬스터(Enemy) 상태(Idle, Chase, Attack, Dead)를 클래스로 관리하여 확장성 확보.
 - **Singleton Pattern:** `GameManager`, `SoundManager`, `UIManager` 등 전역 관리 매니저 구현.
 - **Observer Pattern (Action/Event):** 보스 사망 및 UI 업데이트 등 이벤트 기반의 느슨한 결합(Loose Coupling) 구조.
 - **Cinemachine:** 카메라 추적 및 Impulse(충격) 효과 제어.
