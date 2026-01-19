@@ -108,6 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::JumpPad
   bounceForce: 2000
+  jumpPadSound: {fileID: 8300000, guid: c654a99728b2f435c8bb75b6161804e2, type: 3}
 --- !u!61 &7902105960458146723
 BoxCollider2D:
   m_ObjectHideFlags: 0

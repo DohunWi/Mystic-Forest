@@ -8,18 +8,18 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Data")]
-    public int maxHealth = 5;
-    public int currentHealth = 5;
+    public int maxHealth = 100;
+    public int currentHealth = 100;
     public Vector3 lastCheckPointPos; 
     
-    // ★ 1. 저장 경로를 프로퍼티로 변경 (외부에서 접근 가능, 일관성 유지)
+    //  1. 저장 경로를 프로퍼티로 변경 (외부에서 접근 가능, 일관성 유지)
     // Application.persistentDataPath는 윈도우/맥/모바일 어디서든 안전한 저장소를 찾아줌.
     public string SavePath
     {
         get { return Path.Combine(Application.persistentDataPath, "save.json"); }
     }
 
-    // ★ 2. 파일이 존재하는지 확인하는 헬퍼 (MainMenu에서 사용)
+    //  2. 파일이 존재하는지 확인하는 헬퍼 (MainMenu에서 사용)
     public bool HasSaveFile
     {
         get { return File.Exists(SavePath); }
@@ -60,7 +60,7 @@ public class GameManager : MonoBehaviour
         if (player != null)
         {
             // 1. 현재 위치 갱신
-            lastCheckPointPos = player.transform.position;
+            // CheckPoint.cs에서 갱신
 
             // 2. 현재 체력 갱신 (PlayerHealth 스크립트에서 가져오기)
             PlayerHealth pHealth = player.GetComponent<PlayerHealth>();

@@ -133,7 +133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8afebb106bd8c4ec28284f6ed02fcab9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Trap
-  damage: 1
+  damage: 5
 --- !u!60 &362689403027997712
 PolygonCollider2D:
   m_ObjectHideFlags: 0

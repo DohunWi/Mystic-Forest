@@ -56,7 +56,7 @@ public class MovingPlatform : MonoBehaviour
         }
     }
 
-    // 플레이어가 내렸다! (까먹기)
+    // 플레이어가 내렸다 (까먹기)
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))

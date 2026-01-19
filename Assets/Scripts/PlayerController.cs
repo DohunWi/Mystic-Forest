@@ -3,7 +3,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine; 
 using UnityEngine.Rendering; // 포스트 프로세싱용
-using UnityEngine.Rendering.Universal; 
+using UnityEngine.Rendering.Universal;
+using System.Runtime.InteropServices;
 
 public class PlayerController : MonoBehaviour
 {
@@ -66,7 +67,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float zoomDuration = 0.15f; // 줌 유지 시간
 
     private float defaultLensSize; // 원래 카메라 크기 저장용
-    private ChromaticAberration chromaticAberration; // 색수차 효과 제어용
     private CinemachineImpulseSource impulseSource;
 
     // 내부 변수
@@ -104,12 +104,6 @@ public class PlayerController : MonoBehaviour
         // 1. 카메라 원래 크기 저장
         if (virtualCam != null)
             defaultLensSize = virtualCam.Lens.OrthographicSize;
-
-        // 2. 포스트 프로세싱 효과 가져오기
-        if (globalVolume != null && globalVolume.profile.TryGet(out ChromaticAberration ca))
-        {
-            chromaticAberration = ca;
-        }
     }
     private void Update()
     {
@@ -245,7 +239,7 @@ public class PlayerController : MonoBehaviour
         
         // 점프 소리는 여기서 한 번만 (OnJump에서 중복 재생 방지)
         if(SoundManager.Instance != null)
-            SoundManager.Instance.PlaySFX(jumpSound);
+            SoundManager.Instance.PlaySFX(jumpSound, 1.0f);
     }
 
     // --- Input Events ---
@@ -305,12 +299,20 @@ public class PlayerController : MonoBehaviour
         // 예: 이펙트가 3개인데 4타째가 되면 다시 0번으로
         int stepIndex = comboStep % attackVFXs.Length;
 
+        // 히트 스탑 시간 계산 
+        // 3타(인덱스 2)일 때만 0.15초 멈추고, 2타 일때 0.05초
+        float hitStopDuration;
+        if(stepIndex == 2) hitStopDuration = 0.15f;
+        else if(stepIndex == 1) hitStopDuration = 0.05f;
+        else hitStopDuration = 0;
+        
+
         // --- 2. 소리 재생 ---
         if (SoundManager.Instance != null && attackSounds.Length > 0) 
         {
             // 배열 인덱스 보호 (소리가 이펙트보다 적을 수도 있으니)
             int soundIndex = comboStep % attackSounds.Length;
-            SoundManager.Instance.PlaySFX(attackSounds[soundIndex]);
+            SoundManager.Instance.PlaySFX(attackSounds[soundIndex], 0.8f);
         }
 
         // --- 3. VFX 켜기 ---
@@ -319,6 +321,9 @@ public class PlayerController : MonoBehaviour
 
         // --- 4. 데미지 판정 (콤보마다 데미지 증가 가능) ---
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange);
+        // "진짜 적을 때렸는가?"를 판단할 깃발 변수
+        bool hasHitValidTarget = false;
+        
         foreach (Collider2D enemyCollider in hitEnemies)
         {
             float damage = basicDamage;
@@ -330,6 +335,7 @@ public class PlayerController : MonoBehaviour
                 if (enemyAI != null)
                 {
                     enemyAI.TakeDamage(damage, transform); 
+                    hasHitValidTarget = true;
                 }
             }
             else if(enemyCollider.CompareTag("Boss"))
@@ -338,6 +344,24 @@ public class PlayerController : MonoBehaviour
                 if (bossController != null)
                 {
                     bossController.TakeDamage((float)damage); 
+                    hasHitValidTarget = true;
+                }
+            }
+        }
+        if (hasHitValidTarget)
+        {
+            // 3타(막타)일 때만 멈추거나, 혹은 타격 시 항상 멈추거나 설정한 대로
+            if (hitStopDuration > 0 && global::HitStop.Instance != null)
+            {
+                global::HitStop.Instance.Stop(hitStopDuration);
+            }
+            if (stepIndex == 2 && impulseSource != null) 
+            {
+                impulseSource.GenerateImpulse(1.5f);
+                // 색수차 발동 
+                if (VisualImpactManager.Instance != null)
+                {
+                    VisualImpactManager.Instance.TriggerImpact(0.3f);
                 }
             }
         }
@@ -364,7 +388,7 @@ public class PlayerController : MonoBehaviour
         PlayAnim(ANIM_DASH);
         
         if(SoundManager.Instance != null) 
-            SoundManager.Instance.PlaySFX(dashSound);
+            SoundManager.Instance.PlaySFX(dashSound, 0.6f);
 
         float originalGravity = rb.gravityScale;
         rb.gravityScale = 0f;
@@ -404,14 +428,6 @@ public class PlayerController : MonoBehaviour
         // 3. 로그
         Debug.Log("<color=yellow>공격 패링 성공!</color>");
     }
-
-    // 역경직 (타격감)
-    IEnumerator HitStop()
-    {
-        Time.timeScale = 0.05f; // 시간을 아주 느리게
-        yield return new WaitForSecondsRealtime(0.25f); // 현실 시간 0.25초
-        Time.timeScale = 1.0f; // 정상화
-    }
     IEnumerator ParryJuiceRoutine()
     {
         // --- A. 임팩트 순간 (정지 & 왜곡) ---
@@ -431,9 +447,11 @@ public class PlayerController : MonoBehaviour
             impulseSource.GenerateImpulse(2.0f); 
         }
 
-        // 3. 색수차(글리치) 최대
-        if (chromaticAberration != null)
-            chromaticAberration.intensity.value = 1.0f; // 화면 찢어짐!
+        // 3. 색수차(글리치) 
+        if (VisualImpactManager.Instance != null)
+        {
+            VisualImpactManager.Instance.TriggerImpact(0.3f);
+        }
 
         // 정지 상태로 현실 시간 0.15초 대기 (플레이어가 상황 인식)
         yield return new WaitForSecondsRealtime(0.15f);
@@ -454,17 +472,12 @@ public class PlayerController : MonoBehaviour
             if (virtualCam != null)
                 virtualCam.Lens.OrthographicSize = Mathf.Lerp(zoomAmount, defaultLensSize, t);
 
-            // 3. 색수차: 부드럽게 0으로 복구
-            if (chromaticAberration != null)
-                chromaticAberration.intensity.value = Mathf.Lerp(1.0f, 0f, t);
-
             yield return null;
         }
 
         // --- C. 원상 복구 확인 ---
         Time.timeScale = 1.0f;
         if (virtualCam != null) virtualCam.Lens.OrthographicSize = defaultLensSize;
-        if (chromaticAberration != null) chromaticAberration.intensity.value = 0f;
     }
 
     

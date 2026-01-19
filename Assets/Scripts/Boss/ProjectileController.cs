@@ -11,13 +11,18 @@ public class ProjectileController : MonoBehaviour
     public GameObject hitVFXPrefab; // 벽이나 플레이어에 맞았을 때 터지는 이펙트
 
     [Header("반사 설정")]
-    // 0:불, 1:얼음, 2:독, 3:번개
     public int reflectedFrameIndex = 3; // 반사되면 '3번(번개/노랑)'으로 변신
-    public Color reflectedColor = Color.yellow; // 꼬리랑 빛깔도 노랗게!
+    public Color reflectedColor = Color.yellow; // 꼬리랑 빛깔도 노랗게
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip explosionSound;
+    [SerializeField] private AudioClip spellSound;
 
     void Start()
     {
         // 아무것도 안 맞더라도 lifetime이 지나면 사라지게 예약
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFX(spellSound);
         Destroy(gameObject, lifetime);
     }
 
@@ -141,6 +146,8 @@ public class ProjectileController : MonoBehaviour
         {
             Instantiate(hitVFXPrefab, transform.position, Quaternion.identity);
         }
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFX(explosionSound);
 
         // 2. 투사체 삭제
         Destroy(gameObject);

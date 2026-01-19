@@ -37,9 +37,11 @@ public class SoundManager : MonoBehaviour
     }
 
     // 효과음 재생 (겹쳐도 소리 나게 PlayOneShot 사용)
-    public void PlaySFX(AudioClip clip)
+    public void PlaySFX(AudioClip clip, float volume = 1.0f)
     {
         if (clip == null) return;
-        sfxSource.PlayOneShot(clip, masterVolume);
+        
+        // PlayOneShot: 이미 재생 중인 소리를 끊지 않고 그 위에 얹어서 재생함
+        sfxSource.PlayOneShot(clip, volume);
     }
 }

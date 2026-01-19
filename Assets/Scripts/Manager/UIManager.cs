@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
@@ -14,12 +15,12 @@ public class UIManager : MonoBehaviour
     [Header("패널 연결")]
     public GameObject pausePanel;
     public GameObject gameOverPanel;
+    public GameObject gameClearPanel; 
 
     [Header("보스 UI")]
     public GameObject bossHealthPanel; 
     public Image bossHpBar;
     private bool isPaused = false; // 현재 일시정지 중인가?
-
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -43,7 +44,7 @@ public class UIManager : MonoBehaviour
         float maxHealth = GameManager.Instance.maxHealth;
 
         // 2. 현재 체력 비율 계산 (0.0 ~ 1.0)
-        // ★ 주의: 정수끼리 나누면 소수점이 버려지므로 반드시 (float)로 형변환 해야 함
+        //  주의: 정수끼리 나누면 소수점이 버려지므로 반드시 (float)로 형변환 해야 함
         float ratio = (float)currentHealth / maxHealth;
 
         // 3. UI에 적용 (Fill Amount 조절)
@@ -95,11 +96,10 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f; // ★ 시간을 다시 흐르게 함
     }
 
-    // "저장하고 나가기" 버튼용
-    public void SaveAndQuit()
+    // "나가기" 버튼용
+    public void Quit()
     {
         Time.timeScale = 1f; // (중요) 씬 이동 전에 시간은 다시 흐르게 해야 함
-        GameManager.Instance.SaveGame(); // 저장
         SceneManager.LoadScene("TitleScene"); // 타이틀로 이동 (씬 이름 확인!)
     }
 
@@ -122,5 +122,28 @@ public class UIManager : MonoBehaviour
             // 보험
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+    }
+
+    IEnumerator GameClearRoutine()
+    {
+        // 1. 보스가 죽는 모션 감상 시간 (2초)
+        // 이때 배경음악을 서서히 줄이거나 승리 BGM으로 바꾸면 더 좋음
+        yield return new WaitForSeconds(2.0f);
+
+        // 2. 극적인 슬로우 모션 (선택 사항)
+        Time.timeScale = 0.5f; 
+        yield return new WaitForSecondsRealtime(1.0f); // 현실 시간 1초
+        Time.timeScale = 0f; // 완전 정지 (게임 끝)
+
+        // 3. UI 짠! 하고 켜기
+        if (gameClearPanel != null)
+        {
+            gameClearPanel.SetActive(true);
+            // 패널 안의 애니메이션이나 파티클을 재생해도 좋음
+        }
+    }
+    public void OnBossDead()
+    {   
+        StartCoroutine(GameClearRoutine());
     }
 }

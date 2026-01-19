@@ -5,6 +5,9 @@ public class JumpPad : MonoBehaviour
     [Header("설정")]
     public float bounceForce = 15f; // 튀어 오르는 힘 
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip jumpPadSound;
+
     private Animator anim;
 
     void Start()
@@ -23,6 +26,8 @@ public class JumpPad : MonoBehaviour
                 if (contact.normal.y < -0.5f) // 플레이어가 위에서 내려찍음
                 {
                     Bounce(collision.gameObject);
+                    if(SoundManager.Instance != null)
+                        SoundManager.Instance.PlaySFX(jumpPadSound, 0.7f);
                     break;
                 }
             }

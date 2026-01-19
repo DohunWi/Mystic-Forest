@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.Cinemachine;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -13,17 +14,21 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private Vector2 knockbackPower = new Vector2(10f, 10f); // 넉백 파워 (X, Y)
     [SerializeField] private float knockbackDuration = 0.3f; // 조작 불능 시간
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip hitSound;
     // 내부 변수
     private bool isInvincible = false;
     private PlayerController controller;
     private Rigidbody2D rb;
     private SpriteRenderer sr;
+    private CinemachineImpulseSource impulseSource;
 
     private void Awake()
     {
         controller = GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
+        impulseSource = GetComponent<CinemachineImpulseSource>();
         
     }
     void Start()
@@ -59,6 +64,13 @@ public class PlayerHealth : MonoBehaviour
         // 1. 무적 상태거나 이미 죽었으면 무시
         if (isInvincible || currentHealth <= 0) return;
 
+        if(SoundManager.Instance != null) 
+            SoundManager.Instance.PlaySFX(hitSound);
+
+        if (VisualImpactManager.Instance != null)
+        {
+            VisualImpactManager.Instance.TriggerImpact(0.3f);
+        }
         // 2. 체력 감소
         currentHealth -= damage;
 
@@ -99,6 +111,12 @@ public class PlayerHealth : MonoBehaviour
         rb.linearVelocity = Vector2.zero; // 기존 속도 초기화 
         rb.AddForce(new Vector2(dir * knockbackPower.x, knockbackPower.y), ForceMode2D.Impulse);
 
+        // 카메라 흔들림
+        if (impulseSource != null)
+        {
+            // 힘(Velocity)을 넣어서 흔들기. (기본값은 Vector3.down * 힘)
+            impulseSource.GenerateImpulse(2.0f); 
+        }
         // --- 넉백 시간 동안 대기 ---
         yield return new WaitForSeconds(knockbackDuration);
 

@@ -4853,9 +4853,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectileController
   speed: 20
-  damage: 10
+  damage: 25
   lifetime: 6
   hitVFXPrefab: {fileID: 6513951027837955472, guid: c32f914964f1f45399a9e5a1dd019ea1, type: 3}
+  reflectedFrameIndex: 3
+  reflectedColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  explosionSound: {fileID: 8300000, guid: 88beed327730d4161a3e1d03da956736, type: 3}
+  spellSound: {fileID: 8300000, guid: 71afd79ba9b694bf8a8f936262ffeec5, type: 3}
 --- !u!50 &9141832938815582967
 Rigidbody2D:
   serializedVersion: 5

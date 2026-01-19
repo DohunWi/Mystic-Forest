@@ -12,7 +12,10 @@ public class LightningController : MonoBehaviour
     [Header("연결")]
     public ParticleSystem warningParticle; // 전조 마법진 (파티클)
     public Animator lightningAnim;         // 번개 애니메이터
-    
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip lightningSound;
+  
     private BoxCollider2D col;
     private CinemachineImpulseSource impulse;
 
@@ -42,7 +45,7 @@ public class LightningController : MonoBehaviour
         }
     }
 
-    // ★★★ 애니메이션 이벤트가 호출할 함수 ★★★
+    // 애니메이션 이벤트가 호출할 함수 
     public void OnStrikeHit()
     {
         // 1. 공격 판정 켜기
@@ -50,7 +53,8 @@ public class LightningController : MonoBehaviour
 
         // 2. 화면 흔들림
         if (impulse) impulse.GenerateImpulse(1.5f);
-
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFX(lightningSound);
         // 3. 짧은 시간 뒤에 판정 끄기 (0.1초)
         Invoke("DisableCollider", 0.1f);
     }

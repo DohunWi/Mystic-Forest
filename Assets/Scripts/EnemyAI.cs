@@ -39,6 +39,7 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private AudioClip hitSound;    // 맞았을 때 비명
     [SerializeField] private AudioClip dieSound;    // 사망 소리
     [SerializeField] private AudioClip idleSound; // 평소 울음소리
+    [SerializeField] private float soundMaxDistance = 15f; // 이 거리 안에서만 들림
 
     [Header("References")]
     public Transform playerCheck;  
@@ -178,10 +179,15 @@ public class EnemyAI : MonoBehaviour
             float waitTime = Random.Range(3f, 7f);
             yield return new WaitForSeconds(waitTime);
 
-            // 소리 파일이 있고, 너무 멀리 있지 않을 때만 재생 
-            if (idleSound != null && SoundManager.Instance != null)
+
+            if (idleSound != null && SoundManager.Instance != null && Target != null)
             {
-                SoundManager.Instance.PlaySFX(idleSound);
+                float distance = Vector3.Distance(transform.position, Target.position);
+                
+                if (distance <= soundMaxDistance)
+                {
+                    SoundManager.Instance.PlaySFX(idleSound);
+                }
             }
         }
     }

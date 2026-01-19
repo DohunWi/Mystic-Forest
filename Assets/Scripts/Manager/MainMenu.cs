@@ -54,6 +54,6 @@ public class MainMenu : MonoBehaviour
     public void OnClickQuit()
     {
         Debug.Log("게임 종료!");
-        Application.Quit(); // 실제 빌드된 게임(exe, apk)에서만 창이 꺼집니다.
+        Application.Quit(); // 실제 빌드된 게임(exe, apk)에서만 창이 꺼짐.
     }
 }

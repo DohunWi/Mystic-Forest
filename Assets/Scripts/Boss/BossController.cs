@@ -22,6 +22,13 @@ public class BossController : MonoBehaviour
     public GameObject thunderVFX; // Thunder VFx
     public GameObject magicProjectilePrefab;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip smashSound;
+    [SerializeField] private AudioClip smashWaveSound;
+    [SerializeField] private AudioClip thunderStormSound;
+    [SerializeField] private AudioClip magicCircleSound;
+
+
     [Header("이펙트 연결")] // 여기에 EnrageAura 파티클 연결
     public ParticleSystem[] enrageAura; // 배열로 받기
 
@@ -34,6 +41,10 @@ public class BossController : MonoBehaviour
     [Header("이동 보정 (SmoothDamp)")]
     public float smoothTime = 0.3f; // 도달하는 데 걸리는 대략적인 시간 (작을수록 빠릿, 클수록 미끌)
     private Vector3 currentVelocity; // (내부 계산용) 현재 속도 저장 변수
+
+    [Header("Y축 이동 제한")]
+    public float jumpThreshold = 3.0f; // ★ 이 높이만큼은 플레이어가 뛰어도 보스가 안 따라감
+    private float currentHoverY;
 
     [Header("공격 설정")]
     public float attackCooldown = 3.5f; 
@@ -71,6 +82,8 @@ public class BossController : MonoBehaviour
         if (handL != null) handL_OriginPos = handL.localPosition;
         if (handR != null) handR_OriginPos = handR.localPosition;
         if (body != null) body_OriginPos = body.localPosition;
+        // 전투 시작 시점의 높이를 첫 번째 '유지 높이'로 설정
+        currentHoverY = transform.position.y;
     }
 
     void Update()
@@ -107,15 +120,15 @@ public class BossController : MonoBehaviour
         if (isBattleStarted) return; // 이미 시작했으면 무시
 
         isBattleStarted = true;
-        
-        // 보스 체력바 on!
+        // 전투 시작 시점의 높이를 첫 번째 '유지 높이'로 설정
+        currentHoverY = transform.position.y;
+        // 보스 체력바 on
         if (UIManager.Instance != null) 
-            UIManager.Instance.ShowBossHealth(true);
-
-        // Anim.Play("Boss_Roar"); 
+            UIManager.Instance.ShowBossHealth(true);    
+        // Anim.Play("Boss_Roar"); - 추가 예정
     }
 
-    // ================== [이동 로직 복사본 (필요시 사용)] ==================
+    // ================== [이동 로직 ] ==================
     void AnimateFloating()
     {
         if(body) 
@@ -137,15 +150,28 @@ public class BossController : MonoBehaviour
     }
     void MoveToTarget()
     {
-        // 1. 목표 위치 계산 (기존과 동일)
-        Vector3 targetPos = player.position + new Vector3(0, offsetFromPlayer.y, 0);
-        
+        // 1. X축: 좌우는 항상 플레이어를 따라다님 (오프셋 적용)
+        float targetX = player.position.x;
         if (transform.position.x < player.position.x) 
-            targetPos.x -= offsetFromPlayer.x;
+            targetX -= offsetFromPlayer.x;
         else 
-            targetPos.x += offsetFromPlayer.x;
+            targetX += offsetFromPlayer.x;
 
-        // [핵심 변경] SmoothDamp 사용
+        // "지금 플레이어 위치라면 보스가 이상적으로 어디에 있어야 하지?" (이상적 목표값)
+        float idealY = player.position.y + offsetFromPlayer.y;
+        // 현재 보스가 유지하고 있는 높이(currentHoverY)와 
+        // 이상적인 높이(idealY)의 차이(절대값)를 계산
+        float difference = Mathf.Abs(idealY - currentHoverY);
+        // 그 차이가 임계값(점프 높이)보다 클 때만 높이를 갱신함
+        // "플레이어가 단순히 점프한 게 아니라, 아예 다른 층으로 갔구나"라고 판단될 때
+        if (difference > jumpThreshold)
+        {
+            currentHoverY = idealY;
+        }
+
+        // (보스는 항상 currentHoverY를 향해 움직임)
+        Vector3 targetPos = new Vector3(targetX, currentHoverY, 0);
+        // SmoothDamp 사용
         // 현재 위치에서 -> 목표 위치로 -> smoothTime 동안 부드럽게 이동하되 -> moveSpeed를 넘지 않음
         transform.position = Vector3.SmoothDamp(
             transform.position, // 현재 위치
@@ -190,6 +216,8 @@ public class BossController : MonoBehaviour
     {
         // 1. 애니메이션 발동!
         Anim.Play("Boss_Smash");
+        if(SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFX(smashSound);
 
         // 2. 애니메이션 끝날 때까지 대기 (약 1.2초, 애니 길이만큼)
         // 실제 타격 판정은 아래 'OnSmashImpact' 함수가 해줌
@@ -208,6 +236,8 @@ public class BossController : MonoBehaviour
     IEnumerator MagicAttack()
     {
         Anim.Play("Boss_Casting");
+        if(SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFX(magicCircleSound);
         // 1. 마법진 ON
         if (chargeVFX != null) 
         {
@@ -238,6 +268,9 @@ public class BossController : MonoBehaviour
                 // 힘(Velocity)을 넣어서 흔들기. (기본값은 Vector3.down * 힘)
                 impulseSource.GenerateImpulse(3.0f); 
             }
+            // 폭발 사운드
+            if(SoundManager.Instance != null)
+                SoundManager.Instance.PlaySFX(smashWaveSound);
             // --- 왼쪽 폭발 생성 ---
             Vector3 leftPos = centerPos + (Vector3.left * currentDist);
             if (groundSmashPrefab != null)
@@ -323,6 +356,8 @@ public class BossController : MonoBehaviour
     }
     public void OnThunderStorm()
     {
+        if(SoundManager.Instance != null)
+            SoundManager.Instance.PlaySFX(thunderStormSound);
         if (thunderVFX != null) 
         {
             thunderVFX.gameObject.SetActive(true);
@@ -394,7 +429,23 @@ public class BossController : MonoBehaviour
     void Die()
     {
         currentState = BossState.Dead;
-        // 사망 애니메이션, 파티클, 씬 전환 등 처리
-        Destroy(gameObject, 2f);
+        // 1. 더 이상 맞지 않게 콜라이더 끄기
+        GetComponent<Collider2D>().enabled = false; 
+        
+        // 2. 공격하거나 움직이지 않게 스크립트 기능 끄기
+        this.enabled = false;
+        // 사망 애니메이션
+        Anim.Play("Boss_Death"); 
+    }
+    public void FinishDeathAnimation()
+    {
+        // 애니메이션 이벤트로 매니저에게 엔딩 호출
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.OnBossDead();
+        }
+        
+        // 보스 비활성화
+        gameObject.SetActive(false); 
     }
 }

@@ -27,7 +27,7 @@ public class SceneFader : MonoBehaviour
 
     private void Start()
     {
-        // ★ 게임 시작하자마자 패널을 강제로 킴.
+        //  게임 시작하자마자 패널을 강제로 킴.
         if (fadePanel != null)
         {
             fadePanel.SetActive(true);
@@ -37,7 +37,7 @@ public class SceneFader : MonoBehaviour
         StartCoroutine(FadeIn());
     }
 
-    // ★ 외부에서 이 함수를 호출해서 씬을 바꿈.
+    // 외부에서 이 함수를 호출해서 씬을 바꿈.
     public void FadeToScene(int sceneIndex)
     {
         StartCoroutine(FadeOutAndLoad(sceneIndex));
