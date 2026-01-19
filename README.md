@@ -2,7 +2,7 @@
 
 > **Unity 2D Action Platformer** > *1인 개발 프로젝트 (2025.12 ~ 2026.01)*
 
-![Badge](https://img.shields.io/badge/Unity-2022.3_LTS-black?style=flat&logo=unity)
+![Badge](https://img.shields.io/badge/Unity-6.3_LTS-black?style=flat&logo=unity)
 ![Badge](https://img.shields.io/badge/C%23-Scripting-blue?style=flat&logo=csharp)
 ![Badge](https://img.shields.io/badge/Platform-WebGL-orange?style=flat&logo=html5)
 ![Badge](https://img.shields.io/badge/License-MIT-green?style=flat)
