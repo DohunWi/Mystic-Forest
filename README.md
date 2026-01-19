@@ -23,7 +23,7 @@
 ### 🎥 Gameplay Preview
 | Combat & Parry | Boss Phase & Pattern | Victory Sequence |
 | :---: | :---: | :---: |
-| ![Combo Action](여기에_GIF_이미지_주소_넣기1) | ![Boss Pattern](여기에_GIF_이미지_주소_넣기2) | ![Ending](여기에_GIF_이미지_주소_넣기3) |
+| ![Combo Action](README_Assets/Combat.gif) | ![Boss Pattern](README_Assets/Combat.gif) | ![Ending](README_Assets/Ending.gif) |
 | *3단 콤보 및 패링 시스템* | *부유형 보스 패턴 및 광폭화* | *엔딩 및 슬로우 모션 연출* |
 
 <br>
