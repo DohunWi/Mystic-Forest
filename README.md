@@ -83,3 +83,26 @@ void MoveToTarget()
     // SmoothDamp를 사용하여 묵직한 부유 움직임 구현
     transform.position = Vector3.SmoothDamp(transform.position, targetPos, ref currentVelocity, smoothTime, moveSpeed);
 }
+
+<br>
+
+## 📂 Installation
+이 프로젝트는 **Unity 6.3 LTS** 버전으로 제작되었습니다.
+
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/DohunWi/Mystic-Forest.git](https://github.com/DohunWi/Mystic-Forest.git)
+2. Open in Unity Hub(Add project from disk).
+3. Open **Scenes/TitleScene** to start.
+
+<br>
+
+## 👨‍💻 Author
+### Dohun Wi
+- Developer & Designer
+
+- Game Play: [Play on itch.io](https://dony-wi.itch.io/game)
+
+- Portfolio: https://www.notion.so/Mystic-Forest-2D-2cdb8e281c728063a15de9c46b3adb43?pvs=12
+
+- Email: widohub7@gmail.com
